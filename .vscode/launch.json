@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "train: ProcessedData_scale10",
+            "type": "python",
+            "request": "launch",
+            "program": "run_train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--data-dir", "ProcessedData_scale10",
+                "--save-dir", "./save_dir",
+                "--num-epochs", "4500",
+                "--scaling", "10",
+                "--crop-size", "250",
+                "--loss", "rmse",
+                "--val-every-n-epochs", "1",
+                "--lr-step", "100",
+                "--in-memory"
+            ]
+        },
+        {
+            "name": "eval: ProcessedData_scale10",
+            "type": "python",
+            "request": "launch",
+            "program": "run_eval.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--data-dir", "ProcessedData_scale10",
+                "--checkpoint", "./save_dir/ProcessedData_scale10/experiment_<id>/best_model.pth",
+                "--scaling", "10",
+                "--crop-size", "0",
+                "--in-memory"
+            ]
+        }
+    ]
+}
