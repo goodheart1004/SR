@@ -33,6 +33,10 @@ class Trainer:
             Npre=args.Npre,
             Ntrain=args.Ntrain,
             guide_channels=ProcessedDSMDataset.guide_channels,
+            use_refinement_net=args.use_refinement_net,
+            refinement_channels=args.refinement_channels,
+            refinement_blocks=args.refinement_blocks,
+            refinement_only=args.refinement_only,
         ).to(self.device)
 
         self.experiment_folder, self.args.expN, self.args.randN = new_log(

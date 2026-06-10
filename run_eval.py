@@ -69,6 +69,38 @@ def parse_args():
     )
     parser.add_argument("--Npre", type=int, default=None)
     parser.add_argument("--Ntrain", type=int, default=None)
+    refinement_group = parser.add_mutually_exclusive_group()
+    refinement_group.add_argument(
+        "--use-refinement-net",
+        dest="use_refinement_net",
+        action="store_true",
+        default=None,
+        help="Override args.csv and enable local refinement before diffusion.",
+    )
+    refinement_group.add_argument(
+        "--no-refinement-net",
+        dest="use_refinement_net",
+        action="store_false",
+        default=None,
+        help="Override args.csv and disable local refinement.",
+    )
+    parser.add_argument("--refinement-channels", type=int, default=None)
+    parser.add_argument("--refinement-blocks", type=int, default=None)
+    refinement_only_group = parser.add_mutually_exclusive_group()
+    refinement_only_group.add_argument(
+        "--refinement-only",
+        dest="refinement_only",
+        action="store_true",
+        default=None,
+        help="Override args.csv and skip diffusion.",
+    )
+    refinement_only_group.add_argument(
+        "--no-refinement-only",
+        dest="refinement_only",
+        action="store_false",
+        default=None,
+        help="Override args.csv and run diffusion after refinement.",
+    )
     parser.add_argument("--num-heatmaps", type=int, default=1, help="Number of evaluated samples to save as heatmaps")
     parser.add_argument(
         "--num-fusion-visuals",
@@ -177,7 +209,12 @@ def load_train_args(checkpoint_path, cli_args):
     notes = []
 
     if os.path.isfile(args_csv_path):
-        values.update(load_args_csv(args_csv_path, defaults, actions))
+        loaded = load_args_csv(args_csv_path, defaults, actions)
+        values.update(loaded)
+        if "use_refinement_net" not in loaded:
+            values["use_refinement_net"] = False
+        if "refinement_only" not in loaded:
+            values["refinement_only"] = False
         loaded_from = args_csv_path
     else:
         loaded_from = "arguments/train.py defaults"
@@ -259,6 +296,10 @@ def build_model(train_args, device):
         Npre=train_args.Npre,
         Ntrain=train_args.Ntrain,
         guide_channels=ProcessedDSMDataset.guide_channels,
+        use_refinement_net=train_args.use_refinement_net,
+        refinement_channels=train_args.refinement_channels,
+        refinement_blocks=train_args.refinement_blocks,
+        refinement_only=train_args.refinement_only,
     )
     return model.to(device)
 
@@ -632,7 +673,9 @@ def main():
         f"batch_size={train_args.batch_size}, guide_source={train_args.guide_source}, "
         f"adapter_guide_dir={getattr(train_args, 'adapter_guide_dir', None)}, "
         f"feature_extractor={train_args.feature_extractor}, "
-        f"Npre={train_args.Npre}, Ntrain={train_args.Ntrain} "
+        f"Npre={train_args.Npre}, Ntrain={train_args.Ntrain}, "
+        f"use_refinement_net={train_args.use_refinement_net}, "
+        f"refinement_only={train_args.refinement_only}"
     )
 
     ckpt = safe_torch_load(cli_args.checkpoint, map_location=device)
@@ -657,7 +700,7 @@ def main():
     for sample in tqdm(dataloader, desc="Evaluating", unit="batch", dynamic_ncols=True):
         sample_device = to_device(sample, device)
         output = model(sample_device, train=False)
-        _, loss_dict = get_loss(output, sample_device)
+        _, loss_dict = get_loss(output, sample_device, getattr(train_args, "loss", "rmse"))
         for key, value in loss_dict.items():
             loss_stats[key] = loss_stats.get(key, 0.0) + (
                 value.detach().item() if torch.is_tensor(value) else float(value)

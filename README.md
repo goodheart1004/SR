@@ -45,6 +45,11 @@ Useful defaults:
 - `--scaling 10`
 - `--crop-size 250`
 - `--loss rmse`
+- `--use-refinement-net`
+- `--refinement-channels 64`
+- `--refinement-blocks 4`
+
+The model follows the Real-GDSR-style order: feature extraction from RGB/adapter guide plus bicubic DSM, local residual refinement, then the existing anisotropic diffusion loop without an adjustment step. Use `--refinement-only` to train only the local refinement module, or `--no-refinement-net` to run the diffusion baseline from bicubic DSM.
 
 TensorBoard logs are saved in the experiment folder:
 
@@ -58,4 +63,4 @@ tensorboard --logdir ./save_dir/ProcessedData_scale10
 python run_eval.py --checkpoint ./save_dir/ProcessedData_scale10/experiment_<id>/best_model.pth
 ```
 
-By default evaluation uses the full test image (`--crop-size 0`) and reports `l1_loss`, `mse_loss`, `rmse_loss`, and `optimization_loss` in the DSM value units.
+By default evaluation uses the full test image (`--crop-size 0`) and reports `l1_loss`, `mse_loss`, `rmse_loss`, optional `refinement_*` losses, and `optimization_loss` in the DSM value units.
