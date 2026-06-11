@@ -1,66 +1,38 @@
-# DSM Super-Resolution for ProcessedData_scale10
+# DADASR DSM Super-Resolution Versions
 
-This repository is adapted from DADA for DSM super-resolution on the local `ProcessedData_scale10` dataset.
+This repository keeps three DADASR variants for DSM super-resolution on
+`ProcessedData_scale10`. The previous single-version repository contents were
+replaced by these versioned directories.
 
-The project now has a single dataset path and no legacy benchmark dataset selection. Training logs are written with TensorBoard. Validation best checkpoints are selected by `rmse_loss`.
+## Version Index
 
-## Dataset
+| Version | Module configuration | Description | Tags |
+| --- | --- | --- | --- |
+| `DADASR_addguide_noadj_addrefine` | adapter guide: on; adjustment: off; local refinement: on | Uses RGB plus `adapter_guide` as guide features, applies local residual refinement, then runs the anisotropic diffusion loop without the adjustment step. | `dsm-sr`, `adapter-guide`, `guide-on`, `no-adj`, `local-refinement`, `rmse` |
+| `DADASR_noguide_noadj_addrefine` | adapter guide: off; adjustment: off; local refinement: on | Uses RGB and bicubic DSM without the adapter-guide branch, keeps local residual refinement, and runs diffusion without the adjustment step. | `dsm-sr`, `rgb-guide`, `no-adapter-guide`, `no-adj`, `local-refinement`, `real-gdsr-style` |
+| `DADASR_nodguide_addadj_norefine` | adapter guide: off; adjustment: on; local refinement: off | Keeps the DADA-style RGB plus bicubic DSM input path, ignores adapter-guide inputs, enables the adjustment path, and does not use the local refinement module. | `dsm-sr`, `rgb-guide`, `no-adapter-guide`, `adj`, `no-refinement`, `dada-style` |
 
-The default dataset root is `ProcessedData_scale10`. The loader expects these folders:
+## Directory Layout
 
 ```text
-ProcessedData_scale10
-├── pos_train_DSM_HR
-├── pos_train_DSM_LR
-├── pos_train_RGB
-├── pos_train_adapter_guide
-├── vai_train_DSM_HR
-├── vai_train_DSM_LR
-├── vai_train_RGB
-├── vai_train_adapter_guide
-├── test_DSM_HR
-├── test_DSM_LR
-├── test_RGB
-└── test_adapter_guide
+.
+|-- DADASR_addguide_noadj_addrefine/
+|-- DADASR_noguide_noadj_addrefine/
+`-- DADASR_nodguide_addadj_norefine/
 ```
 
-`SAM3` and `label` folders are loaded when present, but the current DADA-style model uses RGB plus `adapter_guide` as the guide input.
+Each directory is self-contained and includes its own README, training entry
+point, evaluation entry point, model code, data loader, and sample
+`ProcessedData_scale10` files.
 
-## Setup
+## Checkpoint Note
 
-```bash
-conda env create -f environment.yml
-conda activate DSM-SR
-```
+The source `DADASR_noguide_noadj_addrefine` directory contained two checkpoint
+files that were not committed because they are about 373 MB each and exceed the
+normal GitHub blob limit when Git LFS is not available:
 
-## Training
+- `checkpoint/withguide/best_model.pth`
+- `checkpoint/withoutguide/best_model.pth`
 
-```bash
-python run_train.py --save-dir ./save_dir --num-epochs 4500 --val-every-n-epochs 1 --lr-step 100 --in-memory
-```
-
-Useful defaults:
-
-- `--data-dir ProcessedData_scale10`
-- `--scaling 10`
-- `--crop-size 250`
-- `--loss rmse`
-- `--use-refinement-net`
-- `--refinement-channels 64`
-- `--refinement-blocks 4`
-
-The model follows the Real-GDSR-style order: feature extraction from RGB/adapter guide plus bicubic DSM, local residual refinement, then the existing anisotropic diffusion loop without an adjustment step. Use `--refinement-only` to train only the local refinement module, or `--no-refinement-net` to run the diffusion baseline from bicubic DSM.
-
-TensorBoard logs are saved in the experiment folder:
-
-```bash
-tensorboard --logdir ./save_dir/ProcessedData_scale10
-```
-
-## Evaluation
-
-```bash
-python run_eval.py --checkpoint ./save_dir/ProcessedData_scale10/experiment_<id>/best_model.pth
-```
-
-By default evaluation uses the full test image (`--crop-size 0`) and reports `l1_loss`, `mse_loss`, `rmse_loss`, optional `refinement_*` losses, and `optimization_loss` in the DSM value units.
+To version these weights later, enable Git LFS for the repository and track the
+specific checkpoint paths.

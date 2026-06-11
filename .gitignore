@@ -1,5 +1,14 @@
-save_dir/
-__pycache__/
-*.pyc
 .DS_Store
+**/.DS_Store
+
+__pycache__/
+**/__pycache__/
+*.pyc
+
 .idea/
+**/.idea/
+save_dir/
+**/save_dir/
+
+**/checkpoint/withguide/best_model.pth
+**/checkpoint/withoutguide/best_model.pth
