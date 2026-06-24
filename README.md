@@ -1,6 +1,6 @@
 # DADASR DSM Super-Resolution Versions
 
-This repository keeps three DADASR variants for DSM super-resolution on
+This repository keeps four DADASR variants for DSM super-resolution on
 `ProcessedData_scale10`. The previous single-version repository contents were
 replaced by these versioned directories.
 
@@ -9,6 +9,7 @@ replaced by these versioned directories.
 | Version | Module configuration | Description | Tags |
 | --- | --- | --- | --- |
 | `DADASR_addguide_noadj_addrefine` | adapter guide: on; adjustment: off; local refinement: on | Uses RGB plus `adapter_guide` as guide features, applies local residual refinement, then runs the anisotropic diffusion loop without the adjustment step. | `dsm-sr`, `adapter-guide`, `guide-on`, `no-adj`, `local-refinement`, `rmse` |
+| `DADASR_addguide_noadj_doublerefine` | adapter guide: on; adjustment: off; boundary-aware dual local refinement: on | Extends the adapter-guide refinement variant with flat-region and edge-region residual heads, blended by a learned gate and a SAM3/label-derived boundary prior before anisotropic diffusion. | `dsm-sr`, `adapter-guide`, `guide-on`, `no-adj`, `dual-refinement`, `boundary-aware` |
 | `DADASR_noguide_noadj_addrefine` | adapter guide: off; adjustment: off; local refinement: on | Uses RGB and bicubic DSM without the adapter-guide branch, keeps local residual refinement, and runs diffusion without the adjustment step. | `dsm-sr`, `rgb-guide`, `no-adapter-guide`, `no-adj`, `local-refinement`, `real-gdsr-style` |
 | `DADASR_nodguide_addadj_norefine` | adapter guide: off; adjustment: on; local refinement: off | Keeps the DADA-style RGB plus bicubic DSM input path, ignores adapter-guide inputs, enables the adjustment path, and does not use the local refinement module. | `dsm-sr`, `rgb-guide`, `no-adapter-guide`, `adj`, `no-refinement`, `dada-style` |
 
@@ -17,6 +18,7 @@ replaced by these versioned directories.
 ```text
 .
 |-- DADASR_addguide_noadj_addrefine/
+|-- DADASR_addguide_noadj_doublerefine/
 |-- DADASR_noguide_noadj_addrefine/
 `-- DADASR_nodguide_addadj_norefine/
 ```
