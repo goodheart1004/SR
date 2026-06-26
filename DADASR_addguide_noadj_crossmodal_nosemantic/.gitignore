@@ -1,0 +1,27 @@
+.DS_Store
+**/.DS_Store
+.idea/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Training/evaluation outputs
+runs/
+logs/
+checkpoint/
+checkpoints/
+heatmap/
+eval_*/
+*.pth
+*.pt
+*.safetensors
+events.out.tfevents*
+
+# Local virtual environments
+.venv/
+venv/
+env/
+
