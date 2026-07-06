@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "background": {
+    "id": 0,
+    "name": "background_or_no_prompt"
+  },
+  "classes": [
+    {
+      "id": 1,
+      "name": "building",
+      "prompt": "building, rooftop"
+    },
+    {
+      "id": 2,
+      "name": "road",
+      "prompt": "road, paved surface, impervious surface"
+    }
+  ],
+  "ignore": {
+    "id": 255,
+    "name": "overlap"
+  },
+  "boundary": {
+    "folder_suffix": "semantic_boundary",
+    "encoding": "uint8: 0=interior, 1=class boundary"
+  }
+}

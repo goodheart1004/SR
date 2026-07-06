@@ -1,0 +1,4 @@
+0 = background
+1 = building, rooftop
+2 = road, paved surface, impervious surface
+255 = overlap
